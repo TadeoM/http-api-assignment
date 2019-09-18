@@ -11,6 +11,7 @@ const onRequest = (request, response) => {
     switch (request.url) {
         case '/':
             console.log("Getting index");
+            htmlHandler.getCSS(request, response);
             htmlHandler.getIndex(request, response);
             break;
         case '/page2':
