@@ -7,14 +7,21 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
     <script type="text/babel">
+        let pageSelected = '';
+        let typeSelected = '';
 
         // so this takes whatever xhr we got from sendajax, and then interprets it
         // what does the JSON.parse do, does it call something in the other js files?
         // maybe sendAjax is what calls my jsonResponses, and the xhr is just the return from the jsonResponses
         const handleResponse = (xhr) => {
             const content = document.querySelector('#content');
-            console.log("Called this bad boy");
-            const obj = JSON.parse(xhr.response);
+            
+            console.log(pageSelected)
+            let obj = '';
+            if(typeSelected !== 'text/xml'){
+                obj = JSON.parse(xhr.response);
+            }
+            
             switch (xhr.status){
                 case 200:
                     content.innerHTML = '<b>Success</b>'
@@ -22,8 +29,17 @@
                 case 400:
                     content.innerHTML = '<b>Bad Request</b>';
                     break;
+                case 401:
+                    content.innerHTML = '<b>Unauthorized</b>'
+                    break;
+                case 403:
+                    content.innerHTML = '<b>Forbidden</b>'
+                    break;                
                 case 404:
                     content.innerHTML = '<b>Resource Not Found</b>'
+                    break;
+                case 500:
+                    content.innerHTML = '<b>Internal Error</b>'
                     break;
                 default:
                     content.innerHTML = '<p>Status code not implemented by client</p>'
@@ -33,19 +49,24 @@
             if (obj.message){
                 content.innerHTML += `<p>Message: ${obj.message}</p>`;
             }
+            else{
+                content.innerHTML += `<p>Message: ${xhr.response.querySelector('#message')}`
+            }
         };
 
         const sendAjax = (url) => {
-            const xhr = new XMLHttpRequest(); // not sure what exactly this is doing
-            xhr.open('GET', url);   // this is a default function that Gets the URL that was passed in? How does it do anything 
-            xhr.setRequestHeader ("Accept", 'application/json');    // is this calling the onRequest in server.js ?
+            const xhr = new XMLHttpRequest(); 
+            xhr.open('GET', url);   
+            typeSelected = document.querySelector('#type').value;
+            xhr.setRequestHeader ("Accept", typeSelected);    
 
             xhr.onload = () => handleResponse(xhr);
 
             xhr.send();
         };
 
-        const init= () =>{
+        const init = () =>{      
+            /*            
             const success = () => sendAjax('/success');
             const badRequest = () => sendAjax('/badRequest');
             const unauthorized = () => sendAjax('/unauthorized');
@@ -53,13 +74,18 @@
             const internal = () => sendAjax('/internal');
             const notImplemented = () => sendAjax('/notImplemented');
             const notFound = () => sendAjax('/notFound');
+            */
+            pageSelected = document.querySelector('#page').value;
             
-            const pageSelected = document.querySelector('#page').value;
-            const typeSelected = document.querySelector('#type').value;
             const sendButton = document.querySelector('#send');
             
-            sendButton.addEventListener('click', sendAjax(pageSelected));
-        }
+            sendButton.addEventListener('click', () => 
+            { 
+                    pageSelected = document.querySelector('#page').value;
+                    sendAjax(pageSelected); 
+            });
+        };
+        
         window.onload = init;
 
     </script>

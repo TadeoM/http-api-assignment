@@ -1,5 +1,6 @@
 const http = require('http');
 const url = require('url');
+const query = require('querystring');
 
 const htmlHandler = require('./htmlResponses.js');
 const textHandler = require('./textResponses.js');
@@ -11,7 +12,12 @@ const urlStruct = {
     'GET': {
         '/': htmlHandler.getIndex,
         '/style.css': htmlHandler.getCSS,
-        //'/updateUser': jsonHandler.updateUser,
+        '/success': jsonHandler.success,
+        '/badRequest': jsonHandler.badRequest,
+        '/unauthorized': jsonHandler.unauthorized,
+        '/forbidden': jsonHandler.forbidden,
+        '/internal': jsonHandler.internal,
+        '/notImplemented': jsonHandler.notImplemented,
         notFound: jsonHandler.notFound,
     },
     'HEAD': {
@@ -22,15 +28,11 @@ const urlStruct = {
 
 const onRequest = (request, response) => {
     const parsedUrl = url.parse(request.url);
+    const params = query.parse(parsedUrl.query);
 
-    //console.dir(request.method);
-    //console.dir(parsedUrl);
-    
     if (urlStruct[request.method][parsedUrl.pathname]){
-        //console.log("FOUND SOMETHING");
-        urlStruct[request.method][parsedUrl.pathname](request,response);
+        urlStruct[request.method][parsedUrl.pathname](request,response, params);
     } else {
-        //console.log("NOT FOUND");
         urlStruct['HEAD'].notFound(request, response);
     }
 };
