@@ -48,9 +48,12 @@
             
             if (obj.message){
                 content.innerHTML += `<p>Message: ${obj.message}</p>`;
+                console.dir(obj);
             }
-            else{
-                content.innerHTML += `<p>Message: ${xhr.response.querySelector('#message')}`
+            else if (typeSelected === 'text/xml'){
+                const message = xhr.responseXML.querySelector('message').textContent;
+                console.dir(xhr.responseXML.querySelector('message'));
+                content.innerHTML += `<p>Message: ${message}`
             }
         };
 

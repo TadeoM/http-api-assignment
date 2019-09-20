@@ -8,6 +8,7 @@ const respondJSON = (request, response, status, object) => {
     response.end();
 };
 
+
 const respondXML = (request, response, status, object) => {
     const headers = {
         'Content-Type': 'text/xml',
@@ -18,24 +19,19 @@ const respondXML = (request, response, status, object) => {
     response.end();
 };
 
-const respondJSONMeta = (request, response, status) => {
-    const headers = {
-        'Content-Type': 'application/json',
-    }
-
-    response.writeHead(status, headers);
-    response.end();
-};
 
 const success = (request, response) => {
     const responseJSON = {
         message: 'This is a successful response',
     };
     if (request.headers.accept === 'text/xml') {
-        const xmlResponse = `<message>This is a successful response</message>`
+        let responseXML = '<response>';
+        responseXML = `${responseXML} <message>This is a successful response</message>`;
+        responseXML = `${responseXML} </response>`;  
         
-        return respondXML(request, response, 200, xmlResponse);
+        return respondXML(request, response, 200, responseXML);
     }
+    
 
     return respondJSON(request, response, 200, responseJSON);
 };
@@ -43,17 +39,31 @@ const success = (request, response) => {
 const unauthorized = (request, response, params) => {
     const responseJSON = {
         message: 'This is a unauthorized response',
+        id: 'unauthorized',
     };
-    if (request.headers.accept === 'text/xml') {
-        const xmlResponse = `<message>This is a successful response</message>`
-        
-        return respondXML(request, response, 200, xmlResponse);
-    }
+    
     if(params.loggedIn || params.loggedIn !== true){
         responseJSON.message = 'Missing loggedIn query parameter set to true';
         responseJSON.id = 'unauthorized';
         
+        if (request.headers.accept === 'text/xml') {
+            let responseXML = '<response>';
+            responseXML = `${responseXML} <message>This is an unauthorized response</message>`;
+            responseXML = `${responseXML} <id>unauthorized</id>`;
+            responseXML = `${responseXML} </response>`;  
+
+            return respondXML(request, response, 401, responseXML);
+        }
+        
         return respondJSON(request, response, 401, responseJSON);
+    }
+    
+    if (request.headers.accept === 'text/xml') {
+        let responseXML = '<response>';
+        responseXML = `${responseXML} <message>This is an unauthorized response</message>`;
+        responseXML = `${responseXML} </response>`;  
+        
+        return respondXML(request, response, 401, responseXML);
     }
 
     return respondJSON(request, response, 401, responseJSON);
@@ -65,9 +75,11 @@ const forbidden = (request, response) => {
     };
     
     if (request.headers.accept === 'text/xml') {
-        const xmlResponse = `<message>This is a successful response</message>`
+        let responseXML = '<response>';
+        responseXML = `${responseXML} <message>This is a forbidden response</message>`;
+        responseXML = `${responseXML} </response>`;  
         
-        return respondXML(request, response, 403, xmlResponse);
+        return respondXML(request, response, 403, responseXML);
     }
 
     return respondJSON(request, response, 403, responseJSON);
@@ -79,9 +91,11 @@ const internal = (request, response) => {
     };
     
     if (request.headers.accept === 'text/xml') {
-        const xmlResponse = `<message>This is a successful response</message>`
+        let responseXML = '<response>';
+        responseXML = `${responseXML} <message>This is an internal response</message>`;
+        responseXML = `${responseXML} </response>`;  
         
-        return respondXML(request, response, 500, xmlResponse);
+        return respondXML(request, response, 500, responseXML);
     }
 
     return respondJSON(request, response, 500, responseJSON);
@@ -89,13 +103,17 @@ const internal = (request, response) => {
 
 const notImplemented = (request, response) => {
     const responseJSON = {
-        message: 'This is a not implemented response',
+        message: 'This is not implemented',
+        id: 'notImplemented',
     };
     
     if (request.headers.accept === 'text/xml') {
-        const xmlResponse = `<message>This is a successful response</message>`
+        let responseXML = '<response>';
+        responseXML = `${responseXML} <message>This is not implemented</message>`;
+        responseXML = `${responseXML} <id>notImplemented</id>`;
+        responseXML = `${responseXML} </response>`;  
         
-        return respondXML(request, response, 501, xmlResponse);
+        return respondXML(request, response, 501, responseXML);
     }
 
     return respondJSON(request, response, 501, responseJSON);
@@ -109,8 +127,24 @@ const badRequest = (request, response, params) => {
     if (!params.valid || params.valid !== true){
         responseJSON.message = 'Missing valid query parameter set to true';
         responseJSON.id = 'badRequest';
+        if (request.headers.accept === 'text/xml') {
+            let responseXML = '<response>';
+            responseXML = `${responseXML} <message>This is an unauthorized response</message>`;
+            responseXML = `${responseXML} <id>badRequest</id>`;
+            responseXML = `${responseXML} </response>`;  
+
+            return respondXML(request, response, 401, responseXML);
+        }
         
         return respondJSON(request, response, 400, responseJSON);
+    }
+    
+    if (request.headers.accept === 'text/xml') {
+        let responseXML = '<response>';
+        responseXML = `${responseXML} <message>This is not implemented</message>`;
+        responseXML = `${responseXML} </response>`;  
+        
+        return respondXML(request, response, 200, responseXML);
     }
     
     return respondJSON(request, response, 200, responseJSON);
@@ -122,17 +156,15 @@ const notFound = (request, response) => {
         id: 'notFound',
     }
     if (request.headers.accept === 'text/xml') {
-        const xmlResponse = `<message>This is a successful response</message>`
+        let responseXML = '<response>';
+        responseXML = `${responseXML} <message>This is not the page you are looking for.</message>`;
+        responseXML = `${responseXML} <id>notFound</id>`;
+        responseXML = `${responseXML} </response>`;  
         
-        return respondXML(request, response, 404, xmlResponse);
+        return respondXML(request, response, 404, responseXML);
     }
 
     return respondJSON(request, response, 404, responseJSON);
-};
-
-const notFoundMeta = (request, response) => {
-    console.log("notFoundMeta");
-    return respondJSONMeta(request, response, 404);
 };
 
 module.exports = {
@@ -144,5 +176,4 @@ module.exports = {
     internal,
     notImplemented,
     notFound,
-    notFoundMeta,
 };
